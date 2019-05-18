@@ -58,14 +58,47 @@ local function main(params)
 
   local content_image = image.load(params.content_image, 3)
   content_image = image.scale(content_image, params.image_size, 'bilinear')
+
+  local Ch = content_image:size(2)
+  local Cw = content_image:size(3)
+  print("Content image size (wxh) ", Cw, "x", Ch)
+
   local content_image_caffe = preprocess(content_image):float()
 
-  local style_size = math.ceil(params.style_scale * params.image_size)
+  -- local style_size = math.ceil(params.style_scale * params.image_size)
   local style_image_list = params.style_image:split(',')
   local style_images_caffe = {}
   for _, img_path in ipairs(style_image_list) do
     local img = image.load(img_path, 3)
+
+    local Sh = img:size(2)
+    local Sw = img:size(3)
+
+    local style_size = 0
+
+    Cr = Cw / Ch
+    Sr = Sw / Sh
+
+    if Cr >= Sr then
+      if Sr >= 1 then
+        style_size = Cw * params.style_scale
+      else
+        style_size = params.style_scale * Cw * Sh / Sw
+      end
+    else
+      if Sr >= 1 then
+        style_size = params.style_scale * Ch * Sw / Sh
+      else
+        style_size = Ch * params.style_scale
+      end
+    end
+
     img = image.scale(img, style_size, 'bilinear')
+
+    Sh = img:size(2)
+    Sw = img:size(3)
+    print("Style image size (wxh) ", Sw, "x", Sh)
+
     local img_caffe = preprocess(img):float()
     table.insert(style_images_caffe, img_caffe)
   end
