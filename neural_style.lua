@@ -154,8 +154,12 @@ local function main(params)
       local layer = cnn:get(i)
       local name = layer.name
       local layer_type = torch.type(layer)
+      local is_dropout = (layer_type == 'nn.Dropout')
       local is_pooling = (layer_type == 'cudnn.SpatialMaxPooling' or layer_type == 'nn.SpatialMaxPooling')
-      if is_pooling and params.pooling == 'avg' then
+      if is_dropout then
+        local msg = 'Removing dropout at layer %d'
+        print(string.format(msg, i))
+      elseif is_pooling and params.pooling == 'avg' then
         assert(layer.padW == 0 and layer.padH == 0)
         local kW, kH = layer.kW, layer.kH
         local dW, dH = layer.dW, layer.dH
