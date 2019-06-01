@@ -56,6 +56,10 @@ cmd:option('-style_layers', 'relu1_1,relu2_1,relu3_1,relu4_1,relu5_1', 'layers f
 
 
 local function main(params)
+  if params.seed >= 0 then
+    torch.manualSeed(params.seed)
+  end
+
   local dtype, multigpu = setup_gpu(params)
 
   local loadcaffe_backend = params.backend
@@ -64,14 +68,62 @@ local function main(params)
 
   local content_image = image.load(params.content_image, 3)
   content_image = image.scale(content_image, params.image_size, 'bilinear')
+
+  local Ch = content_image:size(2)
+  local Cw = content_image:size(3)
+  print("Content image size (wxh) ", Cw, "x", Ch)
+
   local content_image_caffe = preprocess(content_image):float()
 
-  local style_size = math.ceil(params.style_scale * params.image_size)
+  -- local style_size = math.ceil(params.style_scale * params.image_size)
   local style_image_list = params.style_image:split(',')
   local style_images_caffe = {}
   for _, img_path in ipairs(style_image_list) do
     local img = image.load(img_path, 3)
-    img = image.scale(img, style_size, 'bilinear')
+
+    local Sh = img:size(2)
+    local Sw = img:size(3)
+
+    local style_size = 0
+
+    Cr = Cw / Ch
+    Sr = Sw / Sh
+
+    if Cr >= Sr then
+      if Sr >= 1 then
+        style_size = Cw * params.style_scale
+      else
+        style_size = params.style_scale * Cw * Sh / Sw
+      end
+      -- If size is larger than the style image size then keep original image size
+      if style_size > Sw then 
+        style_size = Sw
+        resizeStyle = 0
+      end
+    else
+      if Sr >= 1 then
+        style_size = params.style_scale * Ch * Sw / Sh
+      else
+        style_size = Ch * params.style_scale
+      end
+      -- If size is larger than the style image size then keep original image size
+      if style_size > Sh then 
+        style_size = Sh
+        resizeStyle = 0
+      end
+    end
+
+    -- Check if style image need to be resized. If not don't resize it for nothing
+    if resizeStyle == 1 then
+      i = image.scale(i, style_size, 'bilinear')
+    else
+      print("Style image will not need to be resized beyond it's current size")
+    end
+
+    Sh = img:size(2)
+    Sw = img:size(3)
+    print("Style image size (wxh) ", Sw, "x", Sh)
+
     local img_caffe = preprocess(img):float()
     table.insert(style_images_caffe, img_caffe)
   end

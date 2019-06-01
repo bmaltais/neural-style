@@ -89,15 +89,30 @@ local function main(params)
       else
         style_size = params.style_scale * Cw * Sh / Sw
       end
+      -- If size is larger than the style image size then keep original image size
+      if style_size > Sw then 
+        style_size = Sw
+        resizeStyle = 0
+      end
     else
       if Sr >= 1 then
         style_size = params.style_scale * Ch * Sw / Sh
       else
         style_size = Ch * params.style_scale
       end
+      -- If size is larger than the style image size then keep original image size
+      if style_size > Sh then 
+        style_size = Sh
+        resizeStyle = 0
+      end
     end
 
-    img = image.scale(img, style_size, 'bilinear')
+    -- Check if style image need to be resized. If not don't resize it for nothing
+    if resizeStyle == 1 then
+      i = image.scale(i, style_size, 'bilinear')
+    else
+      print("Style image will not need to be resized beyond it's current size")
+    end
 
     Sh = img:size(2)
     Sw = img:size(3)
