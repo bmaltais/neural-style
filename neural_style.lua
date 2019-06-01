@@ -79,9 +79,10 @@ local function main(params)
     local Sw = img:size(3)
 
     local style_size = 0
+    local resizeStyle = 1
 
-    Cr = Cw / Ch
-    Sr = Sw / Sh
+    local Cr = Cw / Ch
+    local Sr = Sw / Sh
 
     if Cr >= Sr then
       if Sr >= 1 then
@@ -109,7 +110,7 @@ local function main(params)
 
     -- Check if style image need to be resized. If not don't resize it for nothing
     if resizeStyle == 1 then
-      i = image.scale(i, style_size, 'bilinear')
+      img = image.scale(img, style_size, 'bilinear')
     else
       print("Style image will not need to be resized beyond it's current size")
     end
@@ -294,14 +295,19 @@ local function main(params)
   local function maybe_print(t, loss)
     local verbose = (params.print_iter > 0 and t % params.print_iter == 0)
     if verbose then
+      local totContentLoss = 0
+      local totStyleLoss = 0
+
       print(string.format('Iteration %d / %d', t, params.num_iterations))
       for i, loss_module in ipairs(content_losses) do
         print(string.format('  Content %d loss: %f', i, loss_module.loss))
+        totContentLoss = totContentLoss + loss_module.loss
       end
       for i, loss_module in ipairs(style_losses) do
         print(string.format('  Style %d loss: %f', i, loss_module.loss))
+        totStyleLoss = totStyleLoss + loss_module.loss
       end
-      print(string.format('  Total loss: %f', loss))
+      print(string.format('  Content, Style, Total loss: %f, %f, %f', totContentLoss, totStyleLoss, loss))
     end
   end
 
