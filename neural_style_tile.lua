@@ -54,7 +54,7 @@ cmd:option('-overlap_times', 2, 'Number of fragments to mix for seamless stitchi
 cmd:option('-scale_down', 1, 'Starting scaling factor (0.5, for example).')
 cmd:option('-scale_up', 1, "Final scaling factor (3.0 isn't bad).")
 cmd:option('-scale_steps', 1, 'Upscale steps, 1 for auto (scale <= 2).')
-cmd:option('-tile_size', 400, 'Maximum height / width of the tile image')
+cmd:option('-tile_size', 384, 'Maximum height / width of the tile image')
 
 
 local function main(params)
