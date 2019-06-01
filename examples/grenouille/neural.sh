@@ -41,8 +41,8 @@ th ../neural_style.lua -seed 100 \
 
 
 -----
-If your card does not have enough RAM you can try the tile version of neural_style. Not ass good a result but better than nothing...
-Here is an example that will produce a 900px size output. Had to reduce the style size using scale to fit in the GPU memory
+If your card does not have enough RAM you can try the tile version of neural_style. Not as good a result but better than nothing...
+Here is an example that will produce a 1200px size output. Had to reduce the style size using scale to fit in the 3GB 1060 GPU memory
 -----
 
 th ../neural_style_tile.lua -seed 100 \
