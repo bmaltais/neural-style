@@ -28,7 +28,7 @@ th ../neural_style.lua -seed 100 \
 th ../neural_style.lua -seed 100 \
 -backend cudnn -cudnn_autotune \
 -style_scale 1 -init image -normalize_gradients \
--image_size 1200 -tile_size 500 -num_iterations 500 -save_iter 50 \
+-image_size 1200 -num_iterations 500 -save_iter 50 \
 -content_weight 100 -style_weight 1000 \
 -style_image style.jpg \
 -content_image content.jpg \
@@ -39,6 +39,7 @@ th ../neural_style.lua -seed 100 \
 -style_layers relu3_1,relu4_1,relu4_2,relu5_1 \
 -tv_weight 0.000085 -original_colors 0 && rm *].png
 
+
 -----
 If your card does not have enough RAM you can try the tile version of neural_style. Not ass good a result but better than nothing...
 Here is an example that will produce a 900px size output. Had to reduce the style size using scale to fit in the GPU memory
@@ -46,8 +47,8 @@ Here is an example that will produce a 900px size output. Had to reduce the styl
 
 th ../neural_style_tile.lua -seed 100 \
 -backend cudnn -cudnn_autotune \
--style_scale 0.7 -tile_size 400 -init image -normalize_gradients \
--image_size 900 -tile_size 500 -num_iterations 500 -save_iter 1 \
+-style_scale 0.7 -init image -normalize_gradients \
+-image_size 1200 -tile_size 500 -num_iterations 500 -save_iter 1 \
 -content_weight 100 -style_weight 1000 \
 -style_image style.jpg \
 -content_image content.jpg \

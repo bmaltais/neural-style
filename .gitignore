@@ -1,8 +1,5 @@
-*.swp
-out*.png
-*.png
-*.jpg
 *.prototxt*
 *.caffemodel
 models/
 !models/download_models.sh
+._*.*
