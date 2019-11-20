@@ -68,11 +68,13 @@ local function main(params)
 
   -- Loading images
   local content_image = image.load(params.content_image, 3)
+  print("\n\nOriginal content image size (wxh) ", content_image:size(3), "x", content_image:size(2))
+
   content_image = image.scale(content_image, params.image_size, 'bilinear')
 
   local Ch = content_image:size(2)
   local Cw = content_image:size(3)
-  print("Content image size (wxh) ", Cw, "x", Ch)
+  print("Resized  content image size (wxh) ", Cw, "x", Ch)
 
   local content_image_caffe = preprocess(content_image):float()
 
@@ -81,36 +83,62 @@ local function main(params)
   local style_images_caffe = {}
   for _, img_path in ipairs(style_image_list) do
     local i = image.load(img_path, 3)
+    print(" ")
+    print("Original style image size (wxh) ", i:size(3), "x", i:size(2))
 
     local Sh = i:size(2)
     local Sw = i:size(3)
 
     local style_size = 0
+    local resizeStyle = 1
 
-    Cr = Cw / Ch
-    Sr = Sw / Sh
-    resizeStyle = 1
+    local Cr = Cw / Ch
+    local Sr = Sw / Sh
 
-    if Cr >= Sr then
-      if Sr >= 1 then
-        style_size = Cw * params.style_scale
-      else
-        style_size = params.style_scale * Cw * Sh / Sw
-      end
-      -- If size is larger than the style image size then keep original image size
+    if (Cr >= Sr) and Cr >= 1 and Sr >= 1 then
+      style_size = Cw
       if style_size > Sw then 
         style_size = Sw
         resizeStyle = 0
       end
-    else
-      if Sr >= 1 then
-        style_size = params.style_scale * Ch * Sw / Sh
-      else
-        style_size = Ch * params.style_scale
+    end
+
+    if (Cr <= Sr) and Cr >= 1 and Sr >= 1 then
+      style_size = Cw
+      if style_size > Sw then 
+        style_size = Sw
+        resizeStyle = 0
       end
-      -- If size is larger than the style image size then keep original image size
-      if style_size > Sh then 
-        style_size = Sh
+    end
+
+    if (Cr >= Sr) and Cr >= 1 and Sr <= 1 then
+      style_size = Cw / Sr
+      if Cw >= Sw then 
+        style_size = Sw / Sr
+        resizeStyle = 0
+      end
+    end
+
+    if (Cr <= Sr) and Cr <= 1 and Sr <= 1 then
+      style_size = Cw / Sr
+      if Cw >= Sw then 
+        style_size = Sw / Sr
+        resizeStyle = 0
+      end
+    end
+
+    if (Cr >= Sr) and Cr <= 1 and Sr <= 1 then
+      style_size = Cw / Sr
+      if Cw >= Sw then 
+        style_size = Sw / Sr
+        resizeStyle = 0
+      end
+    end
+
+    if (Cr <= Sr) and Cr <= 1 and Sr >= 1 then
+      style_size = Cw
+      if style_size > Sw then 
+        style_size = Sw
         resizeStyle = 0
       end
     end
@@ -124,12 +152,11 @@ local function main(params)
 
     local Sh = i:size(2)
     local Sw = i:size(3)
-    print("Style image size (wxh) ", Sw, "x", Sh)
+    print("Resized  style image size (wxh) ", Sw, "x", Sh)
 
     local img_caffe = preprocess(i):float()
     table.insert(style_images_caffe, img_caffe)
   end
-
 
   -- Functions for image splitting / merging
   local function image_part(full_image, x, y, width)  -- Coordinates are 1...w/h, space beyond source image is stretched
